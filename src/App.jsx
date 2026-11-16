@@ -7,6 +7,7 @@ import { FlowLoader } from "./features/youtube/components/FlowLoader";
 import { getVideoItems } from "./features/youtube/videoPayload";
 
 const AUTH_RETURN_KEY = "leadhive.youtube.auth-return";
+const FLOW_LOCK_KEY = "leadhive.youtube-flow.locked";
 const FLOW_CHANNEL_KEY = "leadhive.flow.channel";
 const FLOW_PROFILE_KEY = "leadhive.flow.profile";
 const FLOW_VIDEO_KEY = "leadhive.flow.video";
@@ -154,6 +155,16 @@ function HomeRoute() {
   }, [checkingAuth, navigate]);
 
   if (checkingAuth) return <FlowLoader message="Opening your YouTube channels..." />;
+  return <MarketingRoute />;
+}
+
+function MarketingRoute() {
+  const [flowLocked] = useState(() => (
+    sessionStorage.getItem(FLOW_LOCK_KEY) === "true" &&
+    sessionStorage.getItem(AUTH_RETURN_KEY) !== "pending"
+  ));
+
+  if (flowLocked) return <Navigate to="/flow?step=1" replace />;
   return <MarketingApp />;
 }
 
@@ -171,7 +182,7 @@ export default function App() {
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<HomeRoute />} />
-          <Route path="/contact" element={<MarketingApp />} />
+          <Route path="/contact" element={<MarketingRoute />} />
           <Route path="/test-demo" element={<DemoServiceSelection />} />
           <Route path="/demo" element={<Navigate to="/test-demo" replace />} />
           <Route path="/facebook" element={<RegisterClient />} />

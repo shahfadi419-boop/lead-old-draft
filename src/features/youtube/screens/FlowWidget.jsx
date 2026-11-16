@@ -1,12 +1,10 @@
 // Controls the 2-step LeadHive flow: Channel & Persona -> Video, Replies & Analytics.
-// The current step lives in the URL (/flow?step=2) so refresh and the browser Back button work.
+// The current step lives in the URL (/flow?step=2) so refresh and flow-step history work.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { ArrowUpRight } from "lucide-react";
 import { ChannelSelection } from "../components/ChannelSelection";
 import { VideoSelection } from "../components/VideoSelection";
 import { ReplySection } from "../components/ReplySection";
-import { logoutUser } from "../api";
 import { useYoutubeResource } from "../hooks";
 import {
   DEFAULT_COMMENT_FETCH_INTERVAL,
@@ -59,6 +57,7 @@ const FLOW_STEPS = [
 ];
 
 const LAST_STEP = FLOW_STEPS.length - 1;
+const FLOW_LOCK_KEY = "leadhive.youtube-flow.locked";
 
 // Same as useState, but the value is saved in localStorage and restored on refresh
 function useStoredState(key) {
@@ -87,6 +86,10 @@ export const FlowWidget = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const personaFormRef = useRef(null);
+
+  useEffect(() => {
+    sessionStorage.setItem(FLOW_LOCK_KEY, "true");
+  }, []);
 
   // Channel picked in step 1: { id, name, subscribers, views }. Later steps read channel.id.
   const [channel, setChannel] = useStoredState("leadhive.flow.channel");
@@ -133,12 +136,6 @@ export const FlowWidget = () => {
     connectedChannels.some(item => item.youtube_channel_id === channel.id),
   );
   const showInteractiveDemo = !checkingChannels && !hasVerifiedChannel;
-
-  // Exit demo state
-  const [exiting, setExiting] = useState(false);
-  const [exitError, setExitError] = useState("");
-  // Bumped on exit so the active step remounts and refetches (otherwise step 1 keeps showing old channels)
-  const [sessionKey, setSessionKey] = useState(0);
 
   // The workspace is reachable after channel/persona setup; video selection unlocks its tools inline.
   const personaComplete = Boolean(
@@ -234,30 +231,7 @@ export const FlowWidget = () => {
     } catch {
       // Storage can be unavailable in restricted/private browser contexts.
     }
-    navigate("/", { replace: true });
-  };
-
-  // Exit demo: log out on the backend (clears the auth cookie), reset the flow, go back to step 1
-  const exitDemo = async () => {
-    setExiting(true);
-    setExitError("");
-    try {
-      await logoutUser();
-    } catch (err) {
-      // 401 means the session was already gone, which is fine. Anything else: stay put and show the error.
-      if (err?.status !== 401) {
-        setExitError(err?.message || "Could not log out. Please try again.");
-        setExiting(false);
-        return;
-      }
-    }
-    // Setting these to null also clears their localStorage entries (useStoredState does that)
-    setChannel(null);
-    setProfile(null);
-    setVideo(null);
-    setSessionKey(k => k + 1);
-    setSearchParams({ step: "1" }, { replace: true });
-    setExiting(false);
+    navigate("/flow?step=1", { replace: true });
   };
 
   // Component for the active step
@@ -265,16 +239,12 @@ export const FlowWidget = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header: brand, module label, step navigation, demo + exit */}
+      {/* Header: brand, module label, and flow-step navigation */}
       <header className="lh-app-header">
         <div className="lh-app-header-inner">
-          <Link
-            to="/"
-            aria-label="LeadHive AI home"
-            className="lh-app-header-logo shrink-0 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
-          >
+          <div className="lh-app-header-logo shrink-0">
             <img src="/leadhive-logo.png" alt="LeadHive AI" />
-          </Link>
+          </div>
           <span className="hidden h-6 w-px bg-gray-300 sm:block" aria-hidden="true" />
           <Link
             to="/flow?step=1"
@@ -327,29 +297,13 @@ export const FlowWidget = () => {
                 <span>Interactive Demo</span>
               </Link>
             )}
-            <button
-              type="button"
-              onClick={exitDemo}
-              disabled={exiting}
-              className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              <span>{exiting ? "Exiting..." : "Exit Demo"}</span>
-              <ArrowUpRight size={15} aria-hidden="true" />
-            </button>
           </div>
         </div>
       </header>
 
       <div className="mx-auto max-w-7xl p-6">
-        {exitError && (
-          <p role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {exitError}
-          </p>
-        )}
-
         <div>
           <ActiveStep
-            key={sessionKey}
             channel={channel}
             onSelectChannel={selectChannel}
             onDisconnected={clearFlowState}
