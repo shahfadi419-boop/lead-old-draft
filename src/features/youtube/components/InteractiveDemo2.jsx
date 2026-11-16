@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
 import {
-  ArrowLeft,
   ArrowRight,
   BarChart3,
   Bot,
@@ -34,7 +32,7 @@ const DEMO_VIDEOS = [
     description: 'A demo guide to help viewers get started with NourDoc.',
   },
 ]
-const AUTH_RETURN_KEY = 'leadhive.youtube.auth-return'
+const DEMO_ONLY_LOCK_KEY = 'leadhive.youtube-demo-only.locked'
 
 const CHANNEL_ANALYTICS = [
   [
@@ -124,6 +122,10 @@ export function InteractiveDemo2() {
   useEffect(() => () => {
     window.clearTimeout(commentsLoadingTimer.current)
     window.clearTimeout(aiReplyTimer.current)
+  }, [])
+
+  useEffect(() => {
+    sessionStorage.setItem(DEMO_ONLY_LOCK_KEY, 'true')
   }, [])
 
   function updatePersona(field, value) {
@@ -219,36 +221,27 @@ export function InteractiveDemo2() {
     <div className="min-h-screen bg-gray-50">
       <header className="lh-app-header">
         <div className="lh-app-header-inner">
-          <Link
-            to="/"
-            onClick={() => sessionStorage.removeItem(AUTH_RETURN_KEY)}
-            aria-label="Go to LeadHive home"
-            className="lh-app-header-logo shrink-0"
-          >
+          <div className="lh-app-header-logo shrink-0">
             <img src="/leadhive-logo.png" alt="LeadHive AI" />
-          </Link>
+          </div>
           <span className="hidden h-6 w-px bg-gray-300 sm:block" aria-hidden="true" />
-          <Link
-            to="/flow?step=1"
-            onClick={() => sessionStorage.removeItem(AUTH_RETURN_KEY)}
-            className="inline-flex min-w-0 shrink items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-slate-800 transition hover:text-slate-600 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 sm:gap-2 sm:text-sm"
-          >
+          <span className="inline-flex min-w-0 shrink items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-slate-800 sm:gap-2 sm:text-sm">
             <svg width="18" height="14" viewBox="0 0 20 15" aria-hidden="true">
               <rect width="20" height="15" rx="4" fill="#ff0033" />
               <path d="M8 3.5v8l6-4-6-4Z" fill="white" />
             </svg>
             <span>YouTube Intelligence</span>
-          </Link>
+          </span>
           <nav aria-label="Demo steps" className="flex flex-1 justify-center">
             <div className="flex flex-wrap items-center justify-center gap-1">
               <button
                 type="button"
+                disabled={showWalkthrough}
                 aria-current={!showWalkthrough ? 'step' : undefined}
-                onClick={() => setShowWalkthrough(false)}
-                className={`rounded-lg px-3 py-2 text-sm transition-colors ${
+                className={`rounded-lg px-3 py-2 text-sm transition-colors disabled:cursor-default ${
                   !showWalkthrough
                     ? 'bg-cyan-50 font-semibold text-cyan-700'
-                    : 'font-medium text-gray-600 hover:bg-gray-50'
+                    : 'font-medium text-gray-400'
                 }`}
               >
                 Channel &amp; Persona
@@ -256,9 +249,9 @@ export function InteractiveDemo2() {
               <button
                 type="button"
                 aria-current={showWalkthrough ? 'step' : undefined}
-                onClick={() => setShowWalkthrough(true)}
-                disabled={!canContinue}
-                className={`rounded-lg px-3 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                onClick={() => !showWalkthrough && setShowWalkthrough(true)}
+                disabled={!canContinue || showWalkthrough}
+                className={`rounded-lg px-3 py-2 text-sm transition-colors disabled:cursor-default disabled:opacity-50 ${
                   showWalkthrough
                     ? 'bg-cyan-50 font-semibold text-cyan-700'
                     : 'font-medium text-gray-600 hover:bg-gray-50'
@@ -268,24 +261,6 @@ export function InteractiveDemo2() {
               </button>
             </div>
           </nav>
-          <Link
-            to="/test-demo"
-            onClick={() => sessionStorage.removeItem(AUTH_RETURN_KEY)}
-            aria-label="All demo services"
-            title="All demo services"
-            className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft size={15} aria-hidden="true" />
-            <span className="hidden lg:inline">All services</span>
-          </Link>
-          <Link
-            to="/"
-            onClick={() => sessionStorage.removeItem(AUTH_RETURN_KEY)}
-            className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft size={15} aria-hidden="true" />
-            Go to Home
-          </Link>
         </div>
       </header>
 

@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router";
 import MarketingApp from "@/features/marketing/MarketingApp";
 import { FlowWidget } from "./features/youtube/screens/FlowWidget";
 import { getAuthChannels, youtubeRequest } from "./features/youtube/api";
@@ -8,6 +8,7 @@ import { getVideoItems } from "./features/youtube/videoPayload";
 
 const AUTH_RETURN_KEY = "leadhive.youtube.auth-return";
 const FLOW_LOCK_KEY = "leadhive.youtube-flow.locked";
+const DEMO_ONLY_LOCK_KEY = "leadhive.youtube-demo-only.locked";
 const FLOW_CHANNEL_KEY = "leadhive.flow.channel";
 const FLOW_PROFILE_KEY = "leadhive.flow.profile";
 const FLOW_VIDEO_KEY = "leadhive.flow.video";
@@ -176,26 +177,41 @@ function CpanelRedirect() {
   return null;
 }
 
+function AppRoutes() {
+  const location = useLocation();
+
+  if (
+    sessionStorage.getItem(DEMO_ONLY_LOCK_KEY) === "true" &&
+    location.pathname !== "/interactive-demo-2"
+  ) {
+    return <Navigate to="/interactive-demo-2" replace />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<HomeRoute />} />
+      <Route path="/contact" element={<MarketingRoute />} />
+      <Route path="/test-demo" element={<DemoServiceSelection />} />
+      <Route path="/demo" element={<Navigate to="/test-demo" replace />} />
+      <Route path="/facebook" element={<RegisterClient />} />
+      <Route path="/visa/dashboard" element={<VisaDashboard />} />
+      <Route path="/whatsapp" element={<WhatsAppRegisterClient />} />
+      <Route path="/whatsapp/dashboard" element={<WhatsAppDashboard />} />
+      <Route path="/flow" element={<FlowWidget />} />
+      <Route path="/interactive-demo-2" element={<InteractiveDemo2 />} />
+      <Route path="/privacy" element={<LegalPage type="privacy" />} />
+      <Route path="/terms" element={<LegalPage type="terms" />} />
+      <Route path="/cpanel" element={<CpanelRedirect />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Suspense fallback={null}>
-        <Routes>
-          <Route path="/" element={<HomeRoute />} />
-          <Route path="/contact" element={<MarketingRoute />} />
-          <Route path="/test-demo" element={<DemoServiceSelection />} />
-          <Route path="/demo" element={<Navigate to="/test-demo" replace />} />
-          <Route path="/facebook" element={<RegisterClient />} />
-          <Route path="/visa/dashboard" element={<VisaDashboard />} />
-          <Route path="/whatsapp" element={<WhatsAppRegisterClient />} />
-          <Route path="/whatsapp/dashboard" element={<WhatsAppDashboard />} />
-          <Route path="/flow" element={<FlowWidget />} />
-          <Route path="/interactive-demo-2" element={<InteractiveDemo2 />} />
-          <Route path="/privacy" element={<LegalPage type="privacy" />} />
-          <Route path="/terms" element={<LegalPage type="terms" />} />
-          <Route path="/cpanel" element={<CpanelRedirect />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppRoutes />
       </Suspense>
     </BrowserRouter>
   );
