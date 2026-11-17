@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { YoutubeApiError, youtubeRequest } from './api'
 
+const RESOURCE_TIMEOUT_MS = 20000
+
 function errorMessage(error, fallback) {
   return error instanceof Error ? error.message : fallback
 }
@@ -35,7 +37,11 @@ export function useYoutubeResource(path, refresh = 0, pollInterval = 0) {
     let timeout
     async function fetchResource() {
       try {
-        const data = await youtubeRequest(path, { signal: controller.signal, cache: 'no-store' })
+        const data = await youtubeRequest(path, {
+          signal: controller.signal,
+          cache: 'no-store',
+          timeoutMs: RESOURCE_TIMEOUT_MS,
+        })
         if (controller.signal.aborted) return
         setResult({ key: requestKey, path, data, error: '', status: null })
       } catch (error) {

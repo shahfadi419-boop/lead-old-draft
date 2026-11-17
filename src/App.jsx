@@ -9,6 +9,7 @@ import { getVideoItems } from "./features/youtube/videoPayload";
 const AUTH_RETURN_KEY = "leadhive.youtube.auth-return";
 const FLOW_LOCK_KEY = "leadhive.youtube-flow.locked";
 const DEMO_ONLY_LOCK_KEY = "leadhive.youtube-demo-only.locked";
+const WORKSPACE_RESTORE_TIMEOUT_MS = 12000;
 const FLOW_CHANNEL_KEY = "leadhive.flow.channel";
 const FLOW_PROFILE_KEY = "leadhive.flow.profile";
 const FLOW_VIDEO_KEY = "leadhive.flow.video";
@@ -48,15 +49,19 @@ async function restoreSavedWorkspace(channels) {
     if (!channelId) continue;
 
     try {
-      const profileResponse = await youtubeRequest(
-        `/business-profile/${encodeURIComponent(channelId)}`,
-      );
+      const [profileResponse, videosResponse] = await Promise.all([
+        youtubeRequest(
+          `/business-profile/${encodeURIComponent(channelId)}`,
+          { timeoutMs: WORKSPACE_RESTORE_TIMEOUT_MS },
+        ),
+        youtubeRequest(
+          `/selection-videos/${encodeURIComponent(channelId)}?limit=5`,
+          { timeoutMs: WORKSPACE_RESTORE_TIMEOUT_MS },
+        ),
+      ]);
       const profile = getSavedPersona(profileResponse);
       if (!profile) continue;
 
-      const videosResponse = await youtubeRequest(
-        `/selection-videos/${encodeURIComponent(channelId)}?limit=5`,
-      );
       const selectedVideo = getVideoItems(videosResponse).find(video => (
         video.selected && video.youtube_video_id
       ));
@@ -81,6 +86,7 @@ async function restoreSavedWorkspace(channels) {
     } catch (error) {
       if (error?.status === 404) continue;
       console.error(`[Auth] Could not restore saved YouTube workspace for channel ${channelId}`, error);
+      if (error?.code === "timeout") return false;
     }
   }
 
