@@ -1,6 +1,6 @@
 
 // The shared flow state (channel, profile, video) moves into a context in the next step.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { YoutubeApiError, youtubeRequest } from './api'
 
 function errorMessage(error, fallback) {
@@ -13,6 +13,11 @@ function errorMessage(error, fallback) {
 // - set pollInterval to refetch after each completed request
 // Returns { data, error, status, loading }
 export function useYoutubeResource(path, refresh = 0, pollInterval = 0) {
+  const pollIntervalRef = useRef(pollInterval)
+  useEffect(() => {
+    pollIntervalRef.current = pollInterval
+  }, [pollInterval])
+
   // One key per request, so stale results from a previous path are never shown
   const requestKey = path ? `${path}:${refresh}` : null
   const [result, setResult] = useState({
@@ -43,8 +48,8 @@ export function useYoutubeResource(path, refresh = 0, pollInterval = 0) {
           status: error instanceof YoutubeApiError ? error.status : null,
         })
       } finally {
-        if (!controller.signal.aborted && pollInterval > 0) {
-          timeout = globalThis.setTimeout(fetchResource, pollInterval)
+        if (!controller.signal.aborted && pollIntervalRef.current > 0) {
+          timeout = globalThis.setTimeout(fetchResource, pollIntervalRef.current)
         }
       }
     }
@@ -54,7 +59,7 @@ export function useYoutubeResource(path, refresh = 0, pollInterval = 0) {
       controller.abort()
       if (timeout) globalThis.clearTimeout(timeout)
     }
-  }, [path, requestKey, pollInterval])
+  }, [path, requestKey])
 
   // loading is derived: no result yet for the current key means still loading
   if (!requestKey) return { data: null, error: '', status: null, loading: false }

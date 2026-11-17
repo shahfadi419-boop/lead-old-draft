@@ -119,6 +119,8 @@ export function ChannelSelection({
   onPersonaNext,
   commentFetchInterval,
   onCommentFetchIntervalChange,
+  channelResource,
+  onRefreshChannels,
 }) {
   const [params] = useSearchParams()
   const [refresh, setRefresh] = useState(0)
@@ -126,7 +128,15 @@ export function ChannelSelection({
   const [accountActionError, setAccountActionError] = useState('')
   const [accountActionSuccess, setAccountActionSuccess] = useState('')
   const [analyticsChannelId, setAnalyticsChannelId] = useState(channel?.id ?? null)
-  const { data, error, status, loading } = useYoutubeResource('/auth/channels', refresh)
+  const localChannelResource = useYoutubeResource(
+    channelResource ? null : '/auth/channels',
+    refresh,
+  )
+  const { data, error, status, loading } = channelResource || localChannelResource
+  const refreshChannels = () => {
+    if (onRefreshChannels) onRefreshChannels()
+    else setRefresh(value => value + 1)
+  }
 
   // Backend sent us back here with ?auth=failed&reason=...
   const connectionFailed = params.get('auth') === 'failed'
@@ -153,7 +163,7 @@ export function ChannelSelection({
       await disconnectYoutube()
       onDisconnected?.()
       setAccountActionSuccess('YouTube channel disconnected successfully.')
-      setRefresh(value => value + 1)
+      if (!onDisconnected) refreshChannels()
     } catch (actionError) {
       setAccountActionError(actionError?.message || 'Could not disconnect the YouTube channel. Please try again.')
     } finally {
@@ -221,7 +231,7 @@ export function ChannelSelection({
           <p>{error}</p>
           <button
             type="button"
-            onClick={() => setRefresh(n => n + 1)}
+            onClick={refreshChannels}
             className="mt-2 rounded-lg border border-red-300 bg-white px-3 py-1 font-medium hover:bg-red-100"
           >
             Retry
@@ -320,7 +330,7 @@ export function ChannelSelection({
                             <p className="text-xs font-medium text-gray-600">Channel analytics</p>
                             <button
                               type="button"
-                              onClick={() => setRefresh(value => value + 1)}
+                              onClick={refreshChannels}
                               disabled={loading}
                               className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:opacity-50"
                               aria-label="Refresh channel analytics"

@@ -314,7 +314,6 @@ export function ReplySection({
           onCommentFetchIntervalChange?.(Number(intervalMinutes))
         }
         setMonitoringState({ loading: false, saving: false, enabled: response.enabled, error: '' })
-        setRefresh(value => value + 1)
       } catch (err) {
         if (controller.signal.aborted) return
         setMonitoringState({

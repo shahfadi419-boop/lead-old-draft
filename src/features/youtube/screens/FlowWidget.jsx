@@ -127,6 +127,8 @@ export const FlowWidget = () => {
   const {
     data: connectedChannels,
     loading: checkingChannels,
+    error: channelsError,
+    status: channelsStatus,
   } = useYoutubeResource("/auth/channels", channelRefresh);
 
   const hasVerifiedChannel = Boolean(
@@ -315,6 +317,13 @@ export const FlowWidget = () => {
             onPersonaNext={nextStep}
             commentFetchInterval={commentFetchInterval}
             onCommentFetchIntervalChange={updateCommentFetchInterval}
+            channelResource={{
+              data: connectedChannels,
+              error: channelsError,
+              status: channelsStatus,
+              loading: checkingChannels,
+            }}
+            onRefreshChannels={() => setChannelRefresh(value => value + 1)}
             video={video}
             onVideoSaved={setVideo}
           />
