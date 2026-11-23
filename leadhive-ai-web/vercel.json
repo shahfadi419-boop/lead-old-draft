@@ -1,0 +1,169 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "^/cpanel/?$",
+      "status": 302,
+      "dest": "https://core47.hostingmadeeasy.com:2083/"
+    },
+    {
+      "src": "^/auth(?<path>/.*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/auth$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/api(?<path>/(?!facebook(?:/|$)|real-estate(?:/|$)|whatsapp(?:/|$)).*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/api$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/business-profile(?<path>/.*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/business-profile$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/selection-videos(?<path>/.*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/selection-videos$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/comments(?<path>/.*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/comments$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/ai(?<path>/.*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/ai$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/analytics(?<path>/.*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/analytics$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/demo(?<path>/.*)?$",
+      "dest": "https://jzp15m5c-8005.inc1.devtunnels.ms/demo$path",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "X-Tunnel-Skip-AntiPhishing-Page" },
+          "args": "true"
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "ngrok-skip-browser-warning" },
+          "args": "true"
+        }
+      ]
+    },
+    {
+      "src": "^/privacy$",
+      "dest": "/privacy/index.html"
+    },
+    {
+      "src": "^/terms$",
+      "dest": "/terms/index.html"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/.*$",
+      "dest": "/index.html"
+    }
+  ]
+}
